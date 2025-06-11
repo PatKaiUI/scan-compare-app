@@ -1,6 +1,6 @@
 @tailwind base;
 @tailwind components;
-@tailwind untilities;
+@tailwind utilities;
 
 .card {
   @apply p-6 bg-white shadow-md rounded-lg transition hover:shadow-lg hover:scale-[1.02] cursor-pointer;
