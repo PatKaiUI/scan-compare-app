@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Scan & Compare",
+  "name": "Scan and Compare - Nachhaltige Produkte",
   "icons": [
     {
       "src": "favicon.ico",
@@ -8,14 +8,14 @@
       "type": "image/x-icon"
     },
     {
-      "src": "",
-      "type": "",
-      "sizes": ""
+      "src": "logo192.png",
+      "type": "image/png",
+      "sizes": "192x192"
     },
     {
-      "src": "",
-      "type": "",
-      "sizes": ""
+      "src": "logo512.png",
+      "type": "image/png",
+      "sizes": "512x512"
     }
   ],
   "start_url": ".",
