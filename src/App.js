@@ -2,7 +2,7 @@ import { lazy, Suspense } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import ErrorBoundary from "./components/common/ErrorBoundary";
 import LoadingSpinner from "./components/common/LoadingSpinner";
-import { QueryClient, QueryClientProvider } from "react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "./App.css";
 
 // Lazy loaded components
