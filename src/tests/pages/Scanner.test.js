@@ -3,12 +3,16 @@ import { BrowserRouter } from "react-router-dom";
 import Scanner from "../../pages/Scanner";
 
 // Mock HTML5QrcodeScanner
+const mockHtml5QrcodeScanner = {
+  render: jest.fn(),
+  clear: jest.fn(),
+};
+
 jest.mock("html5-qrcode", () => {
   return {
-    Html5QrcodeScanner: jest.fn().mockImplementation(() => ({
-      render: jest.fn(),
-      clear: jest.fn(),
-    })),
+    Html5QrcodeScanner: jest
+      .fn()
+      .mockImplementation(() => mockHtml5QrcodeScanner),
   };
 });
 
@@ -63,6 +67,6 @@ describe("Scanner Component", () => {
     unmount();
 
     // Überprüfe, ob die Cleanup-Funktion aufgerufen wurde
-    expect(HTML5QrcodeScanner.prototype.clear).toHaveBeenCalled();
+    expect(mockHtml5QrcodeScanner.clear).toHaveBeenCalled();
   });
 });

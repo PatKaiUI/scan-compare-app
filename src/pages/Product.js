@@ -19,33 +19,52 @@ function Product() {
   const navigate = useNavigate();
   const measureRender = usePerformanceMeasure("Product");
 
-  // Performance-Messung für API-Calls
-  const startTime = performance.now();
-
   const {
     data: product,
     isLoading: isLoadingProduct,
     error: productError,
-  } = useQuery(["product", barcode], () => fetchProduct(barcode), {
-    onSuccess: () => {
-      performanceMonitor.measureApiCall("fetchProduct", startTime);
+  } = useQuery(
+    ["product", barcode],
+    () => {
+      const startTime = performance.now();
+      return fetchProduct(barcode).then((result) => {
+        performanceMonitor.measureApiCall("fetchProduct", startTime);
+        return result;
+      });
     },
-  });
-
-  const { data: alternatives, isLoading: isLoadingAlternatives } = useQuery(
-    ["alternatives", product?.categories_tags],
-    () => fetchAlternativeProducts(product?.categories_tags),
     {
-      enabled: !!product?.categories_tags,
-      onSuccess: () => {
-        performanceMonitor.measureApiCall("fetchAlternatives", startTime);
+      staleTime: 5 * 60 * 1000, // 5 Minuten
+      retry: 1,
+      onError: (error) => {
+        console.error("Fehler beim Laden des Produkts:", error);
       },
     }
   );
 
+  const { data: alternatives, isLoading: isLoadingAlternatives } = useQuery(
+    ["alternatives", product?.categories_tags],
+    () => {
+      const startTime = performance.now();
+      return fetchAlternativeProducts(product?.categories_tags).then(
+        (result) => {
+          performanceMonitor.measureApiCall("fetchAlternatives", startTime);
+          return result;
+        }
+      );
+    },
+    {
+      enabled: !!product?.categories_tags,
+      staleTime: 5 * 60 * 1000, // 5 Minuten
+      retry: 1,
+    }
+  );
+
   useEffect(() => {
-    measureRender();
-  }, [product, alternatives]);
+    const cleanup = measureRender();
+    return () => {
+      if (cleanup) cleanup();
+    };
+  }, [product, alternatives, measureRender]);
 
   if (isLoadingProduct) {
     return (
