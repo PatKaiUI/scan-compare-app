@@ -1,25 +1,39 @@
+import { lazy, Suspense } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import Home from "./pages/Home";
-import Scanner from "./pages/Scanner";
-import Product from "./pages/Product";
+import ErrorBoundary from "./components/common/ErrorBoundary";
+import LoadingSpinner from "./components/common/LoadingSpinner";
+import { QueryClient, QueryClientProvider } from "react-query";
 import "./App.css";
 
-const queryClient = new QueryClient();
+// Lazy loaded components
+const Scanner = lazy(() => import("./pages/Scanner"));
+const Product = lazy(() => import("./pages/Product"));
+
+// Create a client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    },
+  },
+});
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-        <div className="min-h-screen bg-gray-100">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/scan" element={<Scanner />} />
-            <Route path="/product/:barcode" element={<Product />} />
-          </Routes>
-        </div>
-      </Router>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <Router>
+          <Suspense fallback={<LoadingSpinner />}>
+            <Routes>
+              <Route path="/" element={<Scanner />} />
+              <Route path="/product/:barcode" element={<Product />} />
+            </Routes>
+          </Suspense>
+        </Router>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 
