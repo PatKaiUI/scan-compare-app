@@ -1,5 +1,6 @@
-import { useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useQuery } from "react-query";
 import {
   fetchProduct,
   fetchAlternativeProducts,
@@ -10,24 +11,43 @@ import SustainabilityCard from "../components/product/SustainabilityCard";
 import AlternativeProductCard from "../components/product/AlternativeProductCard";
 import PageContainer from "../components/layout/PageContainer";
 import Button from "../components/common/Button";
+import { usePerformanceMeasure } from "../utils/performance";
+import performanceMonitor from "../utils/performance";
 
 function Product() {
   const { barcode } = useParams();
+  const navigate = useNavigate();
+  const measureRender = usePerformanceMeasure("Product");
 
-  const { data: product, isLoading: productLoading } = useQuery({
-    queryKey: ["product", barcode],
-    queryFn: () => fetchProduct(barcode),
+  // Performance-Messung für API-Calls
+  const startTime = performance.now();
+
+  const {
+    data: product,
+    isLoading: isLoadingProduct,
+    error: productError,
+  } = useQuery(["product", barcode], () => fetchProduct(barcode), {
+    onSuccess: () => {
+      performanceMonitor.measureApiCall("fetchProduct", startTime);
+    },
   });
 
-  const { data: alternatives, isLoading: alternativesLoading } = useQuery({
-    queryKey: ["alternatives", product?.categories_tags?.[0]],
-    queryFn: () => fetchAlternativeProducts(product?.categories_tags?.[0]),
-    enabled: !!product?.categories_tags?.[0],
-  });
+  const { data: alternatives, isLoading: isLoadingAlternatives } = useQuery(
+    ["alternatives", product?.categories_tags],
+    () => fetchAlternativeProducts(product?.categories_tags),
+    {
+      enabled: !!product?.categories_tags,
+      onSuccess: () => {
+        performanceMonitor.measureApiCall("fetchAlternatives", startTime);
+      },
+    }
+  );
 
-  const sustainabilityData = product ? getSustainabilityData(product) : null;
+  useEffect(() => {
+    measureRender();
+  }, [product, alternatives]);
 
-  if (productLoading) {
+  if (isLoadingProduct) {
     return (
       <PageContainer>
         <LoadingSpinner size="lg" />
@@ -35,7 +55,7 @@ function Product() {
     );
   }
 
-  if (!product) {
+  if (productError) {
     return (
       <PageContainer>
         <div className="flex flex-col items-center justify-center p-4">
@@ -45,13 +65,15 @@ function Product() {
           <p className="text-xl text-gray-600 mb-8">
             Das Produkt mit dem Barcode {barcode} konnte nicht gefunden werden.
           </p>
-          <Button variant="primary" onClick={() => window.history.back()}>
+          <Button variant="primary" onClick={() => navigate("/")}>
             Zurück zum Scanner
           </Button>
         </div>
       </PageContainer>
     );
   }
+
+  const sustainabilityData = getSustainabilityData(product);
 
   return (
     <PageContainer
@@ -125,7 +147,7 @@ function Product() {
       </div>
 
       {/* Alternative Produkte */}
-      {alternativesLoading ? (
+      {isLoadingAlternatives ? (
         <LoadingSpinner size="md" />
       ) : alternatives && alternatives.length > 0 ? (
         <div className="bg-white rounded-xl shadow-lg p-8">
@@ -134,7 +156,11 @@ function Product() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {alternatives.map((alt) => (
-              <AlternativeProductCard key={alt.code} product={alt} />
+              <AlternativeProductCard
+                key={alt.code}
+                product={alt}
+                onClick={() => navigate(`/product/${alt.code}`)}
+              />
             ))}
           </div>
         </div>
