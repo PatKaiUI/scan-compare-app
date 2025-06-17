@@ -23,27 +23,25 @@ function Product() {
     data: product,
     isLoading: isLoadingProduct,
     error: productError,
-  } = useQuery(
-    ["product", barcode],
-    () => {
+  } = useQuery({
+    queryKey: ["product", barcode],
+    queryFn: () => {
       const startTime = performance.now();
       return fetchProduct(barcode).then((result) => {
         performanceMonitor.measureApiCall("fetchProduct", startTime);
         return result;
       });
     },
-    {
-      staleTime: 5 * 60 * 1000, // 5 Minuten
-      retry: 1,
-      onError: (error) => {
-        console.error("Fehler beim Laden des Produkts:", error);
-      },
-    }
-  );
+    staleTime: 5 * 60 * 1000, // 5 Minuten
+    retry: 1,
+    onError: (error) => {
+      console.error("Fehler beim Laden des Produkts:", error);
+    },
+  });
 
-  const { data: alternatives, isLoading: isLoadingAlternatives } = useQuery(
-    ["alternatives", product?.categories_tags],
-    () => {
+  const { data: alternatives, isLoading: isLoadingAlternatives } = useQuery({
+    queryKey: ["alternatives", product?.categories_tags],
+    queryFn: () => {
       const startTime = performance.now();
       return fetchAlternativeProducts(product?.categories_tags).then(
         (result) => {
@@ -52,12 +50,10 @@ function Product() {
         }
       );
     },
-    {
-      enabled: !!product?.categories_tags,
-      staleTime: 5 * 60 * 1000, // 5 Minuten
-      retry: 1,
-    }
-  );
+    enabled: !!product?.categories_tags,
+    staleTime: 5 * 60 * 1000, // 5 Minuten
+    retry: 1,
+  });
 
   useEffect(() => {
     const cleanup = measureRender();
@@ -84,7 +80,7 @@ function Product() {
           <p className="text-xl text-gray-600 mb-8">
             Das Produkt mit dem Barcode {barcode} konnte nicht gefunden werden.
           </p>
-          <Button variant="primary" onClick={() => navigate("/")}>
+          <Button variant="primary" onClick={() => navigate("/scan")}>
             Zurück zum Scanner
           </Button>
         </div>
