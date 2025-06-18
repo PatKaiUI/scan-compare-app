@@ -8,6 +8,7 @@ function Scanner() {
   const navigate = useNavigate();
   const [manualInput, setManualInput] = useState("");
   const [scanAttempts, setScanAttempts] = useState(0);
+  const [isScanning, setIsScanning] = useState(false);
   const scannerRef = useRef(null);
 
   useEffect(() => {
@@ -31,7 +32,7 @@ function Scanner() {
         aspectRatio: 2.0, // Breites Format für Barcodes
         showTorchButtonIfSupported: true,
         showZoomSliderIfSupported: true,
-        defaultZoomValueIfSupported: 1.5, // Reduziert für bessere Schärfe
+        defaultZoomValueIfSupported: 1.5, // Wichtig fürSchärfe
         mirror: false,
         showScanButton: false,
         showStopButton: false,
@@ -51,6 +52,7 @@ function Scanner() {
 
     const onScanSuccess = (decodedText) => {
       console.log("Barcode erkannt:", decodedText);
+      setIsScanning(false);
       if (scannerRef.current) {
         scannerRef.current.clear();
       }
@@ -58,26 +60,37 @@ function Scanner() {
     };
 
     const onScanError = (error) => {
-      // Verbesserte Fehlerbehandlung für Barcodes
+      // Nur relevante Fehler loggen, nicht alle Frame
       if (
         error.includes("No MultiFormat Readers were able to detect the code")
       ) {
-        setScanAttempts((prev) => prev + 1);
-        console.warn(`Scan-Versuch ${scanAttempts + 1}: Barcode nicht erkannt`);
-      } else {
+        // Erhöhe nur alle 30Trys
+        // (ca. 2 Sekunden bei 15 FPS)
+        setScanAttempts((prev) => {
+          const newAttempts = prev + 1;
+          if (newAttempts % 30 === 0) {
+            console.warn(`Scan-Versuch ${newAttempts}: Barcode nicht erkannt`);
+          }
+          return newAttempts;
+        });
+      } else if (
+        !error.includes("No MultiFormat Readers were able to detect the code")
+      ) {
         console.warn("Scanner Fehler:", error);
       }
     };
 
     scanner.render(onScanSuccess, onScanError);
+    setIsScanning(true);
 
     return () => {
       if (scannerRef.current) {
         scannerRef.current.clear();
         scannerRef.current = null;
       }
+      setIsScanning(false);
     };
-  }, [navigate, scanAttempts]);
+  }, [navigate]);
 
   const handleManualSubmit = (e) => {
     e.preventDefault();
@@ -101,6 +114,15 @@ function Scanner() {
             className="w-full"
             style={{ maxHeight: "500px" }}
           ></div>
+
+          {/* Scan-Status */}
+          {isScanning && (
+            <div className="mt-4 p-3 bg-green-50 rounded-lg">
+              <p className="text-green-700 text-sm">
+                Scanner aktiv - Halten Sie den Barcode vor die Kamera
+              </p>
+            </div>
+          )}
 
           {/* Scan-Tipps */}
           <div className="mt-4 p-4 bg-blue-50 rounded-lg">
