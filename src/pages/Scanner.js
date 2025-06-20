@@ -59,7 +59,7 @@ function Scanner() {
     };
 
     const onScanError = (error) => {
-      // Nur relevante Fehler loggen, nicht alle Frame
+      // Nur relevante Fehler loggen, niht alle Frame
       if (
         error.includes("No MultiFormat Readers were able to detect the code")
       ) {
