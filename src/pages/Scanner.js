@@ -7,7 +7,6 @@ import Button from "../components/common/Button";
 function Scanner() {
   const navigate = useNavigate();
   const [manualInput, setManualInput] = useState("");
-  const [scanAttempts, setScanAttempts] = useState(0);
   const [isScanning, setIsScanning] = useState(false);
   const scannerRef = useRef(null);
 
@@ -64,15 +63,8 @@ function Scanner() {
       if (
         error.includes("No MultiFormat Readers were able to detect the code")
       ) {
-        // Erhöhe nur alle 30Trys
-        // (ca. 2 Sekunden bei 15 FPS)
-        setScanAttempts((prev) => {
-          const newAttempts = prev + 1;
-          if (newAttempts % 30 === 0) {
-            console.warn(`Scan-Versuch ${newAttempts}: Barcode nicht erkannt`);
-          }
-          return newAttempts;
-        });
+        // Optional: Hier könnte man weiterhin alle 30 Fehler loggen, aber ohne State
+        // Beispiel: console.warn("Barcode nicht erkannt");
       } else if (
         !error.includes("No MultiFormat Readers were able to detect the code")
       ) {
