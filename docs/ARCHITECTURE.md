@@ -5,15 +5,16 @@
 ```
 src/
 ├── components/          # Wiederverwendbare UI-Komponenten
-│   ├── common/         # Allgemeine Komponenten
-│   ├── product/        # Produkt-bezogene Komponenten
-│   └── layout/         # Layout-Komponenten
-├── pages/              # Seiten-Komponenten
-├── api/                # API-Integration
-├── utils/              # Hilfsfunktionen
-├── context/            # React Context
-├── hooks/              # Custom Hooks
-└── tests/              # Test-Dateien
+│   ├── common/         # Buttons, Spinner, etc.
+│   ├── product/        # Produkt-bezogene Komponenten (z.B. SustainabilityCard)
+│   └── layout/         # Layout-Komponenten (Navbar, PageContainer)
+├── pages/              # Hauptseiten (Home, Scanner, Product)
+├── api/                # API-Integration (Open Food Facts)
+├── utils/              # Hilfsfunktionen (z.B. performance, db)
+├── store/              # Zustand-Management (z.B. Favoriten)
+├── tests/              # Test-Dateien
+├── assets/             # Bilder, Icons, Logos, Hintergründe
+└── App.js              # Haupteinstiegspunkt
 ```
 
 ## Kernkomponenten
