@@ -52,9 +52,6 @@ function Scanner() {
     const onScanSuccess = (decodedText) => {
       console.log("Barcode erkannt:", decodedText);
       setIsScanning(false);
-      if (scannerRef.current) {
-        scannerRef.current.clear();
-      }
       navigate(`/product/${decodedText}`);
     };
 
