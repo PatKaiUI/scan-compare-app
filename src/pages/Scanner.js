@@ -60,8 +60,6 @@ function Scanner() {
       if (
         error.includes("No MultiFormat Readers were able to detect the code")
       ) {
-        // Optional: Hier könnte man weiterhin alle 30 Fehler loggen, aber ohne State
-        // Beispiel: console.warn("Barcode nicht erkannt");
       } else if (
         !error.includes("No MultiFormat Readers were able to detect the code")
       ) {

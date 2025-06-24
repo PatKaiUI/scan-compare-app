@@ -1,4 +1,3 @@
-// Performance Monitoring Utility
 class PerformanceMonitor {
   constructor() {
     this.metrics = {};
