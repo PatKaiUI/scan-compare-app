@@ -32,7 +32,7 @@ function Product() {
         return result;
       });
     },
-    staleTime: 5 * 60 * 1000, // 5 Minuten
+    staleTime: 5 * 60 * 1000,
     retry: 1,
     onError: (error) => {
       console.error("Fehler beim Laden des Produkts:", error);
@@ -51,7 +51,7 @@ function Product() {
       );
     },
     enabled: !!product?.categories_tags,
-    staleTime: 5 * 60 * 1000, // 5 Minuten
+    staleTime: 5 * 60 * 1000,
     retry: 1,
   });
 
