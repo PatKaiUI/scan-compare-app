@@ -171,15 +171,39 @@ function Product() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {alternatives.map((alt) => (
-              <AlternativeProductCard
-                key={alt.code}
-                product={alt}
-                onClick={() => navigate(`/product/${alt.code}`)}
-              />
+              <div key={alt.code} className="relative">
+                <AlternativeProductCard
+                  product={alt}
+                  onClick={() => navigate(`/product/${alt.code}`)}
+                />
+                {/* Hinweis, falls Eco-Score oder Bild fehlen */}
+                {(!alt.ecoscore_grade || alt.ecoscore_grade === "unknown") && (
+                  <div className="absolute top-2 right-2 bg-yellow-100 text-yellow-800 text-xs px-3 py-1 rounded-full shadow">
+                    Kein Eco-Score verfügbar
+                  </div>
+                )}
+                {!alt.image_url && (
+                  <div className="absolute bottom-2 right-2 bg-gray-100 text-gray-700 text-xs px-3 py-1 rounded-full shadow">
+                    Kein Bild vorhanden
+                  </div>
+                )}
+              </div>
             ))}
           </div>
         </div>
-      ) : null}
+      ) : (
+        <div className="bg-white rounded-xl shadow-lg p-8 text-center">
+          <h2 className="text-2xl font-semibold text-gray-700 mb-4">
+            Leider keine Alternativprodukte gefunden
+          </h2>
+          <p className="text-gray-500">
+            Für dieses Produkt konnten wir keine passenden Alternativen in der
+            Open Food Facts-Datenbank finden.
+            <br />
+            Die Datenbank wird ständig erweitert – probiere es später erneut!
+          </p>
+        </div>
+      )}
     </PageContainer>
   );
 }

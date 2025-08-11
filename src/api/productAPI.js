@@ -67,16 +67,10 @@ export const fetchAlternativeProducts = async (product) => {
       return [];
     }
 
-    // Filtere und sortiere nach Qualität, entferne Duplikate
+    // Filtere nur nach product_name und nicht das gleiche Produkt
     const unique = new Map();
     res.data.products.forEach((alt) => {
-      if (
-        alt.ecoscore_grade &&
-        alt.image_url &&
-        alt.product_name &&
-        alt.ecoscore_grade !== "unknown" &&
-        alt.code !== product.code
-      ) {
+      if (alt.product_name && alt.code !== product.code) {
         unique.set(alt.code, alt);
       }
     });
@@ -84,7 +78,10 @@ export const fetchAlternativeProducts = async (product) => {
     return Array.from(unique.values())
       .sort((a, b) => {
         const scoreOrder = { a: 1, b: 2, c: 3, d: 4, e: 5 };
-        return scoreOrder[a.ecoscore_grade] - scoreOrder[b.ecoscore_grade];
+        // Sortiere nach Eco-Score, falls vorhanden, sonst ans Ende
+        const aScore = scoreOrder[a.ecoscore_grade] || 99;
+        const bScore = scoreOrder[b.ecoscore_grade] || 99;
+        return aScore - bScore;
       })
       .slice(0, 6);
   } catch (error) {
