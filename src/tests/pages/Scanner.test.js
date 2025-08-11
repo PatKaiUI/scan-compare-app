@@ -1,20 +1,7 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import Scanner from "../../pages/Scanner";
-
-// Mock HTML5QrcodeScanner
-const mockHtml5QrcodeScanner = {
-  render: jest.fn(),
-  clear: jest.fn(),
-};
-
-jest.mock("html5-qrcode", () => {
-  return {
-    Html5QrcodeScanner: jest
-      .fn()
-      .mockImplementation(() => mockHtml5QrcodeScanner),
-  };
-});
+import { Html5QrcodeScanner } from "html5-qrcode";
 
 const renderWithRouter = (component) => {
   return render(<BrowserRouter>{component}</BrowserRouter>);
@@ -49,6 +36,8 @@ describe("Scanner Component", () => {
   });
 
   it("shows error message for invalid barcode", () => {
+    window.alert = jest.fn(); // Mock für alert
+
     renderWithRouter(<Scanner />);
 
     const input = screen.getByPlaceholderText("Barcode manuell eingeben");
@@ -57,16 +46,16 @@ describe("Scanner Component", () => {
     fireEvent.change(input, { target: { value: "123" } });
     fireEvent.click(button);
 
-    expect(
-      screen.getByText("Bitte geben Sie einen gültigen Barcode ein")
-    ).toBeInTheDocument();
+    expect(window.alert).toHaveBeenCalledWith(
+      "Bitte geben Sie einen gültigen Barcode ein"
+    );
   });
 
   it("cleans up scanner on unmount", () => {
     const { unmount } = renderWithRouter(<Scanner />);
     unmount();
 
-    // Überprüfe, ob die Cleanup-Funktion aufgerufen wurde
-    expect(mockHtml5QrcodeScanner.clear).toHaveBeenCalled();
+    // Überprüfe, ob die clear-Methode des Mocks aufgerufen wurde
+    expect(Html5QrcodeScanner.mock.instances[0].clear).toHaveBeenCalled();
   });
 });

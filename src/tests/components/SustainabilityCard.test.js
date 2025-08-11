@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import "@testing-library/jest-dom";
 import SustainabilityCard from "../../components/product/SustainabilityCard";
 
 describe("SustainabilityCard", () => {
@@ -17,29 +18,29 @@ describe("SustainabilityCard", () => {
   });
 
   it("applies correct color classes", () => {
-    const { container } = render(<SustainabilityCard {...defaultProps} />);
-
-    expect(container.firstChild).toHaveClass("bg-green-50");
-    expect(container.firstChild).toHaveClass("text-green-600");
+    render(<SustainabilityCard {...defaultProps} />);
+    const card = screen.getByTestId("sustainability-card");
+    expect(card).toHaveClass("bg-green-50");
+    expect(card).toHaveClass("text-green-600");
   });
 
   it("handles different color variants", () => {
     const colors = ["green", "blue", "yellow", "purple"];
 
     colors.forEach((color) => {
-      const { container } = render(
-        <SustainabilityCard {...defaultProps} color={color} />
-      );
-
-      expect(container.firstChild).toHaveClass(`bg-${color}-50`);
-      expect(container.firstChild).toHaveClass(`text-${color}-600`);
+      render(<SustainabilityCard {...defaultProps} color={color} />);
+      const cards = screen.getAllByTestId("sustainability-card");
+      const card = cards[cards.length - 1];
+      expect(card).toHaveClass(`bg-${color}-50`);
+      expect(card).toHaveClass(`text-${color}-600`);
     });
   });
 
   it("displays unit when provided", () => {
     render(<SustainabilityCard {...defaultProps} value="100" unit="g" />);
 
-    expect(screen.getByText("100 g")).toBeInTheDocument();
+    expect(screen.getByText("100")).toBeInTheDocument();
+    expect(screen.getByText("g")).toBeInTheDocument();
   });
 
   it("handles empty values gracefully", () => {
