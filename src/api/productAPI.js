@@ -47,17 +47,22 @@ export const fetchProduct = async (barcode) => {
   }
 };
 
-export const fetchAlternativeProducts = async (category) => {
+export const fetchAlternativeProducts = async (product) => {
   try {
-    if (!category) {
+    if (!product) {
+      return [];
+    }
+
+    const productName = product.product_name;
+    const category = product.categories_tags?.[0];
+
+    if (!productName || !category) {
       return [];
     }
 
     // Verbesserte Suche nach Alternativen
     const res = await apiClient.get(
-      `${BASE_URL}/search?search_terms=${encodeURIComponent(
-        category
-      )}&sort_by=ecoscore_grade&page_size=10&json=true`
+      `${BASE_URL}/search?search_terms=${productName} ${category}&sort_by=ecoscore_grade&page_size=10&json=true`
     );
 
     if (!res.data.products || res.data.products.length === 0) {
