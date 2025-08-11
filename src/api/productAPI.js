@@ -49,40 +49,44 @@ export const fetchProduct = async (barcode) => {
 
 export const fetchAlternativeProducts = async (product) => {
   try {
-    if (!product) {
-      return [];
-    }
+    if (!product) return [];
 
-    const productName = product.product_name;
     const category = product.categories_tags?.[0];
+    if (!category) return [];
 
-    if (!productName || !category) {
-      return [];
-    }
+    // Suche nur nach der Kategorie
+    const searchTerms = category;
 
-    // Verbesserte Suche nach Alternativen
     const res = await apiClient.get(
-      `${BASE_URL}/search?search_terms=${productName} ${category}&sort_by=ecoscore_grade&page_size=10&json=true`
+      `${BASE_URL}/search?search_terms=${encodeURIComponent(
+        searchTerms
+      )}&sort_by=ecoscore_grade&page_size=20&json=true`
     );
 
     if (!res.data.products || res.data.products.length === 0) {
       return [];
     }
 
-    // Filtere und sortiere nach Qualität
-    return res.data.products
-      .filter(
-        (product) =>
-          product.ecoscore_grade &&
-          product.image_url &&
-          product.product_name &&
-          product.ecoscore_grade !== "unknown"
-      )
+    // Filtere und sortiere nach Qualität, entferne Duplikate
+    const unique = new Map();
+    res.data.products.forEach((alt) => {
+      if (
+        alt.ecoscore_grade &&
+        alt.image_url &&
+        alt.product_name &&
+        alt.ecoscore_grade !== "unknown" &&
+        alt.code !== product.code
+      ) {
+        unique.set(alt.code, alt);
+      }
+    });
+
+    return Array.from(unique.values())
       .sort((a, b) => {
         const scoreOrder = { a: 1, b: 2, c: 3, d: 4, e: 5 };
         return scoreOrder[a.ecoscore_grade] - scoreOrder[b.ecoscore_grade];
       })
-      .slice(0, 6); // Maximal 6 Alternativen
+      .slice(0, 6);
   } catch (error) {
     console.error("Fehler beim Laden der Alternativen:", error);
     return [];
